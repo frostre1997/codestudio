@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,7 +43,6 @@ class DashboardActivity : ComponentActivity() {
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
             addRecentFolder(it.toString())
-            // Open editor
             val intent = Intent(this, EditorActivity::class.java).apply {
                 putExtra("workspace_uri", it.toString())
             }
@@ -61,7 +59,7 @@ class DashboardActivity : ComponentActivity() {
             MaterialTheme {
                 CodeStudioLayout(
                     onOpenFolder = { folderPickerLauncher.launch(null) },
-                    onCloneRepo = { /* show clone dialog later */ },
+                    onCloneRepo = { /* later */ },
                     onOpenFile = { Toast.makeText(this, "Open File (coming soon)", Toast.LENGTH_SHORT).show() },
                     onNewFile = { Toast.makeText(this, "New File (coming soon)", Toast.LENGTH_SHORT).show() },
                     onConnect = { Toast.makeText(this, "Connect (coming soon)", Toast.LENGTH_SHORT).show() },
@@ -110,7 +108,6 @@ fun CodeStudioLayout(
     showWelcome: Boolean,
     onOpenRecent: (String) -> Unit
 ) {
-    // State for selected activity bar icon
     var selectedActivity by remember { mutableStateOf(0) }
 
     Row(modifier = Modifier.fillMaxSize()) {
@@ -120,12 +117,9 @@ fun CodeStudioLayout(
             onItemSelected = { selectedActivity = it }
         )
 
-        // Main content area (right side)
+        // Main content area
         Column(modifier = Modifier.weight(1f)) {
-            // Top Bar
             TopBar()
-
-            // Content (Welcome page or Editor placeholder)
             Box(modifier = Modifier.weight(1f)) {
                 WelcomeScreen(
                     onOpenFolder = onOpenFolder,
@@ -139,8 +133,6 @@ fun CodeStudioLayout(
                     onOpenRecent = onOpenRecent
                 )
             }
-
-            // Bottom Status Bar
             StatusBar()
         }
     }
@@ -148,12 +140,13 @@ fun CodeStudioLayout(
 
 @Composable
 fun ActivityBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
+    // Use only icons that exist in androidx.compose.material.icons.filled.*
     val icons = listOf(
-        Icons.Default.Folder to "Explorer",
-        Icons.Default.Search to "Search",
-        Icons.Default.Code to "Source Control",
-        Icons.Default.PlayArrow to "Run",
-        Icons.Default.Extension to "Extensions"
+        Folder to "Explorer",
+        Search to "Search",
+        Code to "Source Control",
+        PlayArrow to "Run",
+        Build to "Extensions"  // Build exists; you can also use Settings, but we already have that below
     )
 
     Column(
@@ -182,9 +175,8 @@ fun ActivityBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        // Bottom icon for settings or user
         IconButton(onClick = { /* settings */ }) {
-            Icon(Icons.Default.Settings, contentDescription = null, tint = Color.Gray)
+            Icon(Settings, contentDescription = null, tint = Color.Gray)
         }
     }
 }
@@ -215,11 +207,11 @@ fun TopBar() {
             Text(text = "Terminal", color = Color.LightGray, modifier = Modifier.padding(start = 16.dp))
             Text(text = "Help", color = Color.LightGray, modifier = Modifier.padding(start = 16.dp))
         }
-        // Window controls (minimize, maximize, close) – dummy
-        Row {
-            Icon(Icons.Default.HorizontalRule, contentDescription = null, tint = Color.White)
-            Icon(Icons.Default.CropSquare, contentDescription = null, tint = Color.White)
-            Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
+        // Window controls using text to avoid missing icons
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("—", color = Color.White, fontSize = 18.sp, modifier = Modifier.clickable { /* minimize */ })
+            Text("☐", color = Color.White, fontSize = 18.sp, modifier = Modifier.clickable { /* maximize */ })
+            Text("✕", color = Color.White, fontSize = 18.sp, modifier = Modifier.clickable { /* close */ })
         }
     }
 }
@@ -244,12 +236,10 @@ fun StatusBar() {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("Spaces: 4", color = Color.White, fontSize = 12.sp)
-            Text("", color = Color.White, fontSize = 12.sp) // placeholder for encoding
         }
     }
 }
 
-// WelcomeScreen composable (same as before, but we'll keep it here)
 @Composable
 fun WelcomeScreen(
     onOpenFolder: () -> Unit,
@@ -262,11 +252,11 @@ fun WelcomeScreen(
     showWelcome: Boolean,
     onOpenRecent: (String) -> Unit
 ) {
-    // Reuse the previous WelcomeScreen code – I'll paste it below
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color(0xFF1E1E1E))
-        .padding(24.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF1E1E1E))
+            .padding(24.dp)
     ) {
         Row(modifier = Modifier.weight(1f)) {
             // Left panel
@@ -349,7 +339,6 @@ fun WelcomeScreen(
     }
 }
 
-// Helper composables (same as before)
 @Composable
 fun WelcomeActionButton(text: String, onClick: () -> Unit) {
     Button(
