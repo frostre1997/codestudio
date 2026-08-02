@@ -11,41 +11,32 @@ android {
         applicationId = "com.android.codestudio.app"
         minSdk = 21
         targetSdk = 34
-        versionCode = 100
+        versionCode = 1001
         versionName = "0.10.0-alpha.1"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
-       }
-    }
-
-    signingConfigs {
-        // Use debug keystore for all variants (if you don't have a release key)
-        create("debug") {
-            storeFile = file("debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
         }
     }
 
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("debug")
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
         }
         release {
-            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
         create("nightly") {
             initWith(getByName("release"))
             versionNameSuffix = "-nightly"
             applicationIdSuffix = ".nightly"
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -53,7 +44,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
+ 
     kotlinOptions {
         jvmTarget = "17"
     }
