@@ -20,12 +20,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -140,13 +138,13 @@ fun CodeStudioLayout(
 
 @Composable
 fun ActivityBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
-    // Use only icons that exist in androidx.compose.material.icons.filled.*
+    // Use fully qualified Icons.Filled.*
     val icons = listOf(
-        Folder to "Explorer",
-        Search to "Search",
-        Code to "Source Control",
-        PlayArrow to "Run",
-        Build to "Extensions"  // Build exists; you can also use Settings, but we already have that below
+        Pair(Icons.Filled.Folder, "Explorer"),
+        Pair(Icons.Filled.Search, "Search"),
+        Pair(Icons.Filled.Code, "Source Control"),
+        Pair(Icons.Filled.PlayArrow, "Run"),
+        Pair(Icons.Filled.Build, "Extensions")
     )
 
     Column(
@@ -176,7 +174,7 @@ fun ActivityBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
         }
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { /* settings */ }) {
-            Icon(Settings, contentDescription = null, tint = Color.Gray)
+            Icon(Icons.Filled.Settings, contentDescription = null, tint = Color.Gray)
         }
     }
 }
