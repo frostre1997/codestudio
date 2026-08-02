@@ -12,8 +12,7 @@ android {
         minSdk = 21
         targetSdk = 34
         versionCode = 1001
-        versionName = "0.10.0-alpha.1"
-
+        versionName = "0.10.0"
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
@@ -23,6 +22,7 @@ android {
         debug {
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "-alpha.1" // debug version
         }
         release {
             isMinifyEnabled = false
@@ -31,10 +31,11 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "-alpha.1" // release version
         }
         create("nightly") {
             initWith(getByName("release"))
-            versionName = "0.10.0-nighty.1"
+            versionNameSuffix = "-nighty.1" // nighty version
             applicationIdSuffix = ".nightly"
             signingConfig = signingConfigs.getByName("debug")
         }
