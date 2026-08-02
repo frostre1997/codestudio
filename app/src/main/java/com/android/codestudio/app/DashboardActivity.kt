@@ -2,56 +2,136 @@ package com.android.codestudio.app
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-class DashboardActivity : AppCompatActivity() {
+class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard)
-
-        val btnCreateProject = findViewById<Button>(R.id.btnCreateProject)
-        val btnOpenProject = findViewById<Button>(R.id.btnOpenProject)
-        val btnCloneRepo = findViewById<Button>(R.id.btnCloneRepo)
-        val btnTerminal = findViewById<Button>(R.id.btnTerminal)
-        val btnGetStarted = findViewById<Button>(R.id.btnGetStarted)
-        val btnPreferences = findViewById<Button>(R.id.btnPreferences)
-        val btnIdeConfig = findViewById<Button>(R.id.btnIdeConfig)
-        val btnDocumentation = findViewById<Button>(R.id.btnDocumentation)
-
-        btnCreateProject.setOnClickListener {
-            Toast.makeText(this, "Create Project (coming soon)", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, EditorActivity::class.java))
+        setContent {
+            MaterialTheme {
+                DashboardScreen(
+                    onCreateProject = {
+                        startActivity(Intent(this, EditorActivity::class.java))
+                    },
+                    onOpenProject = {
+                        startActivity(Intent(this, EditorActivity::class.java))
+                    },
+                    onCloneRepo = {
+                        // future
+                    },
+                    onTerminal = {
+                        // future
+                    },
+                    onGetStarted = {
+                        // future
+                    },
+                    onPreferences = {
+                        // future
+                    },
+                    onIdeConfig = {
+                        // future
+                    },
+                    onDocumentation = {
+                        // future
+                    }
+                )
+            }
         }
+    }
+}
 
-        btnOpenProject.setOnClickListener {
-            Toast.makeText(this, "Open Project (coming soon)", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, EditorActivity::class.java))
-        }
+@Composable
+fun DashboardScreen(
+    onCreateProject: () -> Unit,
+    onOpenProject: () -> Unit,
+    onCloneRepo: () -> Unit,
+    onTerminal: () -> Unit,
+    onGetStarted: () -> Unit,
+    onPreferences: () -> Unit,
+    onIdeConfig: () -> Unit,
+    onDocumentation: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Android Code Studio",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF3F51B5),
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Text(
+            text = "Your Ideas, Anywhere",
+            fontSize = 16.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
 
-        btnCloneRepo.setOnClickListener {
-            Toast.makeText(this, "Clone Repository (coming soon)", Toast.LENGTH_SHORT).show()
+        // Grid of buttons (2 columns)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                DashboardButton("Create project", onClick = onCreateProject, modifier = Modifier.weight(1f))
+                DashboardButton("Open existing project", onClick = onOpenProject, modifier = Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                DashboardButton("Clone git repository", onClick = onCloneRepo, modifier = Modifier.weight(1f))
+                DashboardButton("Terminal", onClick = onTerminal, modifier = Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                DashboardButton("Get started", onClick = onGetStarted, modifier = Modifier.weight(1f))
+                DashboardButton("Preferences", onClick = onPreferences, modifier = Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                DashboardButton("IDE Configurations", onClick = onIdeConfig, modifier = Modifier.weight(1f))
+                DashboardButton("Documentation", onClick = onDocumentation, modifier = Modifier.weight(1f))
+            }
         }
+    }
+}
 
-        btnTerminal.setOnClickListener {
-            Toast.makeText(this, "Terminal (coming soon)", Toast.LENGTH_SHORT).show()
-        }
-
-        btnGetStarted.setOnClickListener {
-            Toast.makeText(this, "Get Started (coming soon)", Toast.LENGTH_SHORT).show()
-        }
-
-        btnPreferences.setOnClickListener {
-            Toast.makeText(this, "Preferences (coming soon)", Toast.LENGTH_SHORT).show()
-        }
-
-        btnIdeConfig.setOnClickListener {
-            Toast.makeText(this, "IDE Configurations (coming soon)", Toast.LENGTH_SHORT).show()
-        }
-
-        btnDocumentation.setOnClickListener {
-            Toast.makeText(this, "Documentation (coming soon)", Toast.LENGTH_SHORT).show()
-        }
+@Composable
+fun DashboardButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(80.dp)
+            .padding(4.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+        shape = MaterialTheme.shapes.medium,
+        elevation = ButtonDefaults.buttonElevation(4.dp)
+    ) {
+        Text(text = text, fontSize = 14.sp, fontWeight = FontWeight.Medium)
     }
 }
