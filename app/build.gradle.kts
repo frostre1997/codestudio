@@ -15,12 +15,12 @@ android {
         versionName = "0.10.0-alpha.1"
 
         ndk {
-            abiFilters("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "x86_64")
        }
     }
 
     signingConfigs {
-        // Use debug keystore for all variants
+        // Use debug keystore for all variants (if you don't have a release key)
         create("debug") {
             storeFile = file("debug.keystore")
             storePassword = "android"
