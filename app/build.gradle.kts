@@ -34,7 +34,7 @@ android {
         }
         create("nightly") {
             initWith(getByName("release"))
-            versionNameSuffix = "-nightly"
+            versionName = "0.10.0-nighty.1"
             applicationIdSuffix = ".nightly"
             signingConfig = signingConfigs.getByName("debug")
         }
