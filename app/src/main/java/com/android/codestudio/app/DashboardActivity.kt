@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -17,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,68 +24,68 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.File
 
 class DashboardActivity : ComponentActivity() {
 
     private lateinit var prefs: android.content.SharedPreferences
+
+    // Folder picker launcher
+    private val folderPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        uri?.let {
+            // Persist permission
+            contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            // Save to recent list
+            addRecentFolder(it.toString())
+            // Open editor with this folder
+            val intent = Intent(this, EditorActivity::class.java).apply {
+                putExtra("workspace_uri", it.toString())
+            }
+            startActivity(intent)
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = getSharedPreferences("codestudio_prefs", MODE_PRIVATE)
 
         setContent {
-            MaterialTheme {
-                WelcomeScreen(
-                    onOpenFolder = { openFolderPicker() },
-                    onCloneRepo = { showCloneDialog() },
-                    onOpenFile = { /* future */ },
-                    onNewFile = { /* future */ },
-                    onConnect = { /* future */ },
-                    recentFolders = getRecentFolders(),
-                    onShowWelcomeChange = { show ->
-                        prefs.edit().putBoolean("show_welcome", show).apply()
-                    },
-                    showWelcome = prefs.getBoolean("show_welcome", true)
-                )
-            }
-        }
-    }
+            var showCloneDialog by remember { mutableStateOf(false) }
 
-    private fun openFolderPicker() {
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocumentTree()
-        ) { uri: Uri? ->
-            uri?.let {
-                // Persist permission
-                contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                // Save to recent list
-                addRecentFolder(it.toString())
-                // Open editor with this folder
-                val intent = Intent(this, EditorActivity::class.java).apply {
-                    putExtra("workspace_uri", it.toString())
-                }
-                startActivity(intent)
-                finish()
-            }
-        }
-        launcher.launch(null)
-    }
-
-    private fun showCloneDialog() {
-        // We'll show a simple dialog to input Git URL and destination folder
-        setContent {
-            CloneDialog(
-                onDismiss = { /* close dialog */ },
-                onClone = { url, dest ->
-                    // Save destination to recent
-                    // Start clone with JGit (later)
-                    Toast.makeText(this, "Clone not yet implemented", Toast.LENGTH_SHORT).show()
+            WelcomeScreen(
+                onOpenFolder = { folderPickerLauncher.launch(null) },
+                onCloneRepo = { showCloneDialog = true },
+                onOpenFile = { Toast.makeText(this, "Open File (coming soon)", Toast.LENGTH_SHORT).show() },
+                onNewFile = { Toast.makeText(this, "New File (coming soon)", Toast.LENGTH_SHORT).show() },
+                onConnect = { Toast.makeText(this, "Connect (coming soon)", Toast.LENGTH_SHORT).show() },
+                recentFolders = getRecentFolders(),
+                onShowWelcomeChange = { show ->
+                    prefs.edit().putBoolean("show_welcome", show).apply()
+                },
+                showWelcome = prefs.getBoolean("show_welcome", true),
+                onOpenRecent = { uri ->
+                    val intent = Intent(this, EditorActivity::class.java).apply {
+                        putExtra("workspace_uri", uri)
+                    }
+                    startActivity(intent)
+                    finish()
                 }
             )
+
+            if (showCloneDialog) {
+                CloneDialog(
+                    onDismiss = { showCloneDialog = false },
+                    onClone = { url, dest ->
+                        Toast.makeText(this, "Clone not yet implemented", Toast.LENGTH_SHORT).show()
+                        showCloneDialog = false
+                    }
+                )
+            }
         }
     }
 
@@ -114,97 +114,93 @@ fun WelcomeScreen(
     onConnect: () -> Unit,
     recentFolders: List<String>,
     onShowWelcomeChange: (Boolean) -> Unit,
-    showWelcome: Boolean
+    showWelcome: Boolean,
+    onOpenRecent: (String) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-    ) {
-        // Left panel (Start)
-        Column(
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(24.dp)
         ) {
-            Text(
-                text = "Start",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF007ACC)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            WelcomeActionButton("New File...", onNewFile)
-            WelcomeActionButton("Open File...", onOpenFile)
-            WelcomeActionButton("Open Folder...", onOpenFolder)
-            WelcomeActionButton("Clone Git Repository...", onCloneRepo)
-            WelcomeActionButton("Connect to...", onConnect)
-        }
-
-        // Right panel (Recent + Walkthroughs)
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = "Recent",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF007ACC)
-            )
-            if (recentFolders.isEmpty()) {
+            // Left panel (Start)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
-                    text = "You have no recent folders, open a folder to start.",
-                    color = Color.Gray
+                    text = "Start",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF007ACC)
                 )
-            } else {
-                recentFolders.forEach { uri ->
-                    RecentItem(uri) {
-                        // Open that folder
-                        val intent = Intent(androidx.core.content.ContextWrapper(androidx.compose.ui.platform.LocalContext.current), EditorActivity::class.java).apply {
-                            putExtra("workspace_uri", uri)
-                        }
-                        androidx.compose.ui.platform.LocalContext.current.startActivity(intent)
-                        (androidx.compose.ui.platform.LocalContext.current as? ComponentActivity)?.finish()
-                    }
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+                WelcomeActionButton("New File...", onNewFile)
+                WelcomeActionButton("Open File...", onOpenFile)
+                WelcomeActionButton("Open Folder...", onOpenFolder)
+                WelcomeActionButton("Clone Git Repository...", onCloneRepo)
+                WelcomeActionButton("Connect to...", onConnect)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Right panel (Recent + Walkthroughs)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Recent",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF007ACC)
+                )
+                if (recentFolders.isEmpty()) {
+                    Text(
+                        text = "You have no recent folders, open a folder to start.",
+                        color = Color.Gray
+                    )
+                } else {
+                    recentFolders.forEach { uri ->
+                        RecentItem(uri, onClick = { onOpenRecent(uri) })
+                    }
+                }
 
-            Text(
-                text = "Walkthroughs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF007ACC)
-            )
-            WalkthroughItem("Get Started with CodeStudio", "Customize your editor, learn the basics, and start coding")
-            WalkthroughItem("Learn the Fundamentals", "Core concepts of Android development")
-            WalkthroughItem("GitHub Copilot [Updated]", "AI‑assisted coding")
-            WalkthroughItem("Get Started with Python Development [Updated]", "Python support in CodeStudio")
-            WalkthroughItem("More...", "Additional guides and resources")
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Walkthroughs",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF007ACC)
+                )
+                WalkthroughItem("Get Started with CodeStudio", "Customize your editor, learn the basics, and start coding")
+                WalkthroughItem("Learn the Fundamentals", "Core concepts of Android development")
+                WalkthroughItem("GitHub Copilot [Updated]", "AI‑assisted coding")
+                WalkthroughItem("Get Started with Python Development [Updated]", "Python support in CodeStudio")
+                WalkthroughItem("More...", "Additional guides and resources")
+            }
         }
-    }
 
-    // Bottom checkbox
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Checkbox(
-            checked = showWelcome,
-            onCheckedChange = onShowWelcomeChange
-        )
-        Text(
-            text = "Show welcome page on startup",
-            modifier = Modifier.padding(start = 8.dp)
-        )
+        // Bottom checkbox
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Checkbox(
+                checked = showWelcome,
+                onCheckedChange = onShowWelcomeChange
+            )
+            Text(
+                text = "Show welcome page on startup",
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
     }
 }
 
@@ -225,19 +221,19 @@ fun WelcomeActionButton(text: String, onClick: () -> Unit) {
 
 @Composable
 fun RecentItem(uri: String, onClick: () -> Unit) {
-    // Extract folder name from URI
-    val name = try {
-        val doc = DocumentsContract.Document.COLUMN_DISPLAY_NAME
-        val cursor = androidx.compose.ui.platform.LocalContext.current.contentResolver.query(
-            uri.toUri(), null, null, null, null
-        )
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val nameIndex = it.getColumnIndex(doc)
-                if (nameIndex >= 0) it.getString(nameIndex) else uri
-            } else uri
-        } ?: uri
-    } catch (e: Exception) { uri }
+    val context = LocalContext.current
+    val name = remember(uri) {
+        try {
+            val doc = DocumentsContract.Document.COLUMN_DISPLAY_NAME
+            val cursor = context.contentResolver.query(uri.toUri(), null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val nameIndex = it.getColumnIndex(doc)
+                    if (nameIndex >= 0) it.getString(nameIndex) else uri
+                } else uri
+            } ?: uri
+        } catch (e: Exception) { uri }
+    }
     TextButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
@@ -271,8 +267,6 @@ fun CloneDialog(onDismiss: () -> Unit, onClone: (String, String) -> Unit) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Clone Git Repository", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
-                // Input fields: URL and destination (we'll just use a default folder for now)
-                // For simplicity, we'll just show a toast.
                 Text("Coming soon...")
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onDismiss) {
