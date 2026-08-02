@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 
 class SetupActivity : AppCompatActivity() {
 
@@ -27,11 +26,9 @@ class SetupActivity : AppCompatActivity() {
 
         nextButton.setOnClickListener {
             if (currentStep == 6) {
-                // Mark setup as complete
-                val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+                val prefs = getSharedPreferences("codestudio_prefs", MODE_PRIVATE)
                 prefs.edit().putBoolean("setup_complete", true).apply()
 
-                // Go to editor
                 startActivity(Intent(this, EditorActivity::class.java))
                 finish()
             } else {
