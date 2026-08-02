@@ -14,7 +14,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SetupActivity" />
+        <activity android:name=".DashboardActivity" />
         <activity android:name=".EditorActivity" />
     </application>
 </manifest>
