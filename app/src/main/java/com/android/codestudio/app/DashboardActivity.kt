@@ -138,14 +138,13 @@ fun CodeStudioLayout(
 
 @Composable
 fun ActivityBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
-    // Use fully qualified Icons.Filled.*
     val icons = listOf(
-        Pair(Icons.Filled.Folder, "Explorer"),
-        Pair(Icons.Filled.Search, "Search"),
-        Pair(Icons.Filled.Code, "Source Control"),
-        Pair(Icons.Filled.PlayArrow, "Run"),
-        Pair(Icons.Filled.Build, "Extensions")
-    )
+        Icons.Filled.Folder to "Explorer",
+        Icons.Filled.Search to "Search",
+        Icons.Filled.Code to "Source Control",
+        Icons.Filled.PlayArrow to "Run",
+        Icons.Filled.Build to "Extensions"
+   )
 
     Column(
         modifier = Modifier
