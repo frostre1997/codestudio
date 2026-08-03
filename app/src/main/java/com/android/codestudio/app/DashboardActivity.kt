@@ -78,6 +78,9 @@ class DashboardActivity : ComponentActivity() {
                     },
                     onOpenFolder = { folderPickerLauncher.launch(null) },
                     onCloneRepo = { Toast.makeText(this, "Clone dialog coming soon", Toast.LENGTH_SHORT).show() },
+                    onOpenFile = { Toast.makeText(this, "Open File (coming soon)", Toast.LENGTH_SHORT).show() },
+                    onNewFile = { Toast.makeText(this, "New File (coming soon)", Toast.LENGTH_SHORT).show() },
+                    onConnect = { Toast.makeText(this, "Connect (coming soon)", Toast.LENGTH_SHORT).show() },
                     repositories = repositories,
                     extensions = extensions,
                     onExtensionStateChanged = { updated ->
