@@ -5,19 +5,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.codestudio.app.utils.CommitInfo
 import com.android.codestudio.app.utils.GitManager
+import com.android.codestudio.app.utils.GitStatus
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -32,7 +36,7 @@ fun GitScreen(repoPath: String?) {
     // States
     var currentBranch by remember { mutableStateOf("") }
     var branches by remember { mutableStateOf(listOf<String>()) }
-    var status by remember { mutableStateOf(GitManager.GitStatus()) }
+    var status by remember { mutableStateOf(GitStatus()) }
     var stagedFiles by remember { mutableStateOf(listOf<String>()) }
     var commitMessage by remember { mutableStateOf("") }
     var commitHistory by remember { mutableStateOf(listOf<CommitInfo>()) }
@@ -67,7 +71,7 @@ fun GitScreen(repoPath: String?) {
             if (branchesResult.isSuccess) branches = branchesResult.getOrNull() ?: emptyList()
 
             val statusResult = GitManager.getStatus(path)
-            if (statusResult.isSuccess) status = statusResult.getOrNull() ?: GitManager.GitStatus()
+            if (statusResult.isSuccess) status = statusResult.getOrNull() ?: GitStatus()
             else errorMessage = statusResult.exceptionOrNull()?.message
 
             val logResult = GitManager.getCommitHistory(path, 20)
@@ -91,7 +95,7 @@ fun GitScreen(repoPath: String?) {
         val path = File(repoPath ?: "")
         coroutineScope.launch {
             val statusResult = GitManager.getStatus(path)
-            if (statusResult.isSuccess) status = statusResult.getOrNull() ?: GitManager.GitStatus()
+            if (statusResult.isSuccess) status = statusResult.getOrNull() ?: GitStatus()
             val logResult = GitManager.getCommitHistory(path, 20)
             if (logResult.isSuccess) commitHistory = logResult.getOrNull() ?: emptyList()
             val latestResult = GitManager.getLatestCommit(path)
@@ -446,14 +450,6 @@ fun GitScreen(repoPath: String?) {
             value = username,
             onValueChange = { username = it },
             label = { Text("Username (optional)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors()
-        )
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password / Token (optional)") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors()
