@@ -30,7 +30,6 @@ import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-// Data classes
 data class Repository(
     val name: String,
     val context: String,
@@ -272,7 +271,8 @@ fun WelcomeScreen(
     showWelcome: Boolean,
     onOpenRecent: (String) -> Unit
 ) {
-    // Sample data – replace with real data later
+    val context = LocalContext.current
+
     val repositories = remember {
         listOf(
             Repository("codestudio", "github.com/frostre1997/codestudio", "dev", "No Changes", "a few seconds ago"),
@@ -286,7 +286,6 @@ fun WelcomeScreen(
     var selectedFilter by remember { mutableStateOf("Active") }
     var limit by remember { mutableStateOf(50) }
 
-    // Filtered and limited list
     val filteredRepos = repositories.filter { repo ->
         repo.name.contains(searchQuery, ignoreCase = true) ||
                 repo.context.contains(searchQuery, ignoreCase = true)
@@ -322,19 +321,15 @@ fun WelcomeScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 placeholder = { Text("Search Repositories", color = Color.Gray) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF2D2D30),
-                    unfocusedContainerColor = Color(0xFF2D2D30),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.weight(1f),
+                colors = OutlinedTextFieldDefaults.colors(),
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Color(0xFF2D2D30)),
                 textStyle = LocalTextStyle.current.copy(color = Color.White),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
-            // Filter dropdown (simplified – we use a button that shows options)
             var filterExpanded by remember { mutableStateOf(false) }
             Box {
                 Button(
@@ -360,7 +355,6 @@ fun WelcomeScreen(
                 }
             }
 
-            // Limit dropdown
             var limitExpanded by remember { mutableStateOf(false) }
             Box {
                 Button(
@@ -386,7 +380,6 @@ fun WelcomeScreen(
                 }
             }
 
-            // New Repository button
             Button(
                 onClick = { onCloneRepo() },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF007ACC), contentColor = Color.White),
@@ -406,11 +399,11 @@ fun WelcomeScreen(
             items(filteredRepos) { repo ->
                 RepositoryItem(
                     repo = repo,
-                    onStop = { Toast.makeText(LocalContext.current, "Stop ${repo.name}", Toast.LENGTH_SHORT).show() },
-                    onDownload = { Toast.makeText(LocalContext.current, "Download ${repo.name}", Toast.LENGTH_SHORT).show() },
-                    onShare = { Toast.makeText(LocalContext.current, "Share ${repo.name}", Toast.LENGTH_SHORT).show() },
-                    onPin = { Toast.makeText(LocalContext.current, "Pin ${repo.name}", Toast.LENGTH_SHORT).show() },
-                    onDelete = { Toast.makeText(LocalContext.current, "Delete ${repo.name}", Toast.LENGTH_SHORT).show() },
+                    onStop = { Toast.makeText(context, "Stop ${repo.name}", Toast.LENGTH_SHORT).show() },
+                    onDownload = { Toast.makeText(context, "Download ${repo.name}", Toast.LENGTH_SHORT).show() },
+                    onShare = { Toast.makeText(context, "Share ${repo.name}", Toast.LENGTH_SHORT).show() },
+                    onPin = { Toast.makeText(context, "Pin ${repo.name}", Toast.LENGTH_SHORT).show() },
+                    onDelete = { Toast.makeText(context, "Delete ${repo.name}", Toast.LENGTH_SHORT).show() },
                     onClick = { onOpenRecent(repo.context) }
                 )
             }
@@ -511,4 +504,9 @@ fun RepositoryItem(
 fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
     AssistChip(
         onClick = onClick,
-        label = { Text(text, color = if (selected) Color.W
+        label = { Text(text, color = if (selected) Color.White else Color.Gray) },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = if (selected) Color(0xFF007ACC) else Color(0xFF2D2D30)
+        )
+    )
+}
