@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 object Routes {
     const val REPOS = "repositories"
     const val EXTENSIONS = "extensions"
+    const val GIT = "git"
     const val SETTINGS = "settings"
 }
 
