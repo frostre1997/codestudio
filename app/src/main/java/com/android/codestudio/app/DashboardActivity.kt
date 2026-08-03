@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.android.codestudio.app.data.Extension
 import com.android.codestudio.app.data.PreferencesManager
@@ -45,7 +46,6 @@ class DashboardActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         prefs = getSharedPreferences("codestudio_prefs", MODE_PRIVATE)
 
-        // Load settings
         isDarkTheme = PreferencesManager.getDarkTheme(prefs)
 
         setContent {
@@ -65,7 +65,6 @@ class DashboardActivity : ComponentActivity() {
                     extraLarge = RoundedCornerShape(24.dp)
                 )
             ) {
-                // Load repositories and extensions
                 val repositories = getRecentRepositories()
                 var extensions by remember {
                     mutableStateOf(PreferencesManager.getExtensions(prefs))
@@ -107,7 +106,6 @@ class DashboardActivity : ComponentActivity() {
     }
 
     private fun getRecentRepositories(): List<Repository> {
-        // For demo – replace with real data later
         return listOf(
             Repository("codestudio", "github.com/frostre1997/codestudio", "dev", "No Changes", "a few seconds ago"),
             Repository("python-flask-example", "github.com/gitpod-io/python-flask-example", "main", "No Changes", "a few seconds ago"),
@@ -116,7 +114,6 @@ class DashboardActivity : ComponentActivity() {
     }
 
     private fun addRecentFolder(uri: String) {
-        // We'll store recent folders as a list in prefs
         val json = prefs.getString("recent_folders", "[]")
         val type = object : TypeToken<List<String>>() {}.type
         val list = Gson().fromJson<List<String>>(json, type) ?: emptyList()
