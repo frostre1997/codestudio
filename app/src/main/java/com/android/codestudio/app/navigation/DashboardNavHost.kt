@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +22,7 @@ import com.android.codestudio.app.data.Repository
 import com.android.codestudio.app.ui.ExtensionsScreen
 import com.android.codestudio.app.ui.RepositoriesScreen
 import com.android.codestudio.app.ui.SettingsScreen
+import kotlinx.coroutines.launch
 
 object Routes {
     const val REPOS = "repositories"
@@ -28,6 +30,7 @@ object Routes {
     const val SETTINGS = "settings"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardNavHost(
     isDarkTheme: Boolean,
@@ -44,6 +47,7 @@ fun DashboardNavHost(
 ) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -71,7 +75,7 @@ fun DashboardNavHost(
                     selected = currentDestination == Routes.REPOS,
                     onClick = {
                         navController.navigate(Routes.REPOS) { popUpTo(Routes.REPOS) { inclusive = true } }
-                        drawerState.close()
+                        coroutineScope.launch { drawerState.close() }
                     },
                     icon = { Icon(Icons.Filled.Folder, contentDescription = null) },
                     colors = NavigationDrawerItemDefaults.colors(
@@ -84,7 +88,7 @@ fun DashboardNavHost(
                     selected = currentDestination == Routes.EXTENSIONS,
                     onClick = {
                         navController.navigate(Routes.EXTENSIONS)
-                        drawerState.close()
+                        coroutineScope.launch { drawerState.close() }
                     },
                     icon = { Icon(Icons.Filled.Extension, contentDescription = null) },
                     colors = NavigationDrawerItemDefaults.colors(
@@ -97,7 +101,7 @@ fun DashboardNavHost(
                     selected = currentDestination == Routes.SETTINGS,
                     onClick = {
                         navController.navigate(Routes.SETTINGS)
-                        drawerState.close()
+                        coroutineScope.launch { drawerState.close() }
                     },
                     icon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                     colors = NavigationDrawerItemDefaults.colors(
@@ -110,7 +114,7 @@ fun DashboardNavHost(
                     label = { Text("Logout") },
                     selected = false,
                     onClick = {
-                        drawerState.close()
+                        coroutineScope.launch { drawerState.close() }
                         onLogout()
                     },
                     icon = { Icon(Icons.Filled.Logout, contentDescription = null) },
@@ -126,7 +130,9 @@ fun DashboardNavHost(
                 TopAppBar(
                     title = { Text("CodeStudio") },
                     navigationIcon = {
-                        IconButton(onClick = { drawerState.open() }) {
+                        IconButton(onClick = {
+                            coroutineScope.launch { drawerState.open() }
+                        }) {
                             Icon(Icons.Filled.Menu, contentDescription = "Open drawer")
                         }
                     },
