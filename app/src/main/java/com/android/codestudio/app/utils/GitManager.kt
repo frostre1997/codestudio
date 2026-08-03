@@ -45,11 +45,11 @@ object GitManager {
             Git.open(repoPath).use { git ->
                 val status = git.status().call()
                 val result = GitStatus(
-                    modified = status.modified,
-                    added = status.added,
-                    deleted = status.removed,
-                    untracked = status.untracked,
-                    conflicting = status.conflicting
+                    modified = status.modified.toList(),
+                    added = status.added.toList(),
+                    deleted = status.removed.toList(),
+                    untracked = status.untracked.toList(),
+                    conflicting = status.conflicting.toList()
                 )
                 Result.success(result)
             }
