@@ -37,6 +37,9 @@ fun DashboardNavHost(
     onThemeToggle: (Boolean) -> Unit,
     onOpenFolder: () -> Unit,
     onCloneRepo: () -> Unit,
+    onOpenFile: () -> Unit,
+    onNewFile: () -> Unit,
+    onConnect: () -> Unit,
     repositories: List<Repository>,
     extensions: List<Extension>,
     onExtensionStateChanged: (List<Extension>) -> Unit,
@@ -62,6 +65,7 @@ fun DashboardNavHost(
                 drawerContainerColor = drawerBgColor,
                 drawerShape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
             ) {
+                // Drawer header
                 Text(
                     text = "CodeStudio",
                     modifier = Modifier.padding(16.dp),
@@ -70,6 +74,8 @@ fun DashboardNavHost(
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                 )
                 Divider(color = onSurfaceColor.copy(alpha = 0.12f))
+
+                // Navigation items
                 NavigationDrawerItem(
                     label = { Text("Repositories") },
                     selected = currentDestination == Routes.REPOS,
@@ -109,6 +115,10 @@ fun DashboardNavHost(
                         unselectedContainerColor = Color.Transparent
                     )
                 )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Logout at bottom
                 Divider(color = onSurfaceColor.copy(alpha = 0.12f))
                 NavigationDrawerItem(
                     label = { Text("Logout") },
@@ -130,9 +140,7 @@ fun DashboardNavHost(
                 TopAppBar(
                     title = { Text("CodeStudio") },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            coroutineScope.launch { drawerState.open() }
-                        }) {
+                        IconButton(onClick = { coroutineScope.launch { drawerState.open() } }) {
                             Icon(Icons.Filled.Menu, contentDescription = "Open drawer")
                         }
                     },
@@ -156,7 +164,13 @@ fun DashboardNavHost(
                     RepositoriesScreen(
                         repositories = repositories,
                         onOpenRecent = onOpenRecent,
-                        onCloneRepo = onCloneRepo
+                        onCloneRepo = onCloneRepo,
+                        onOpenFile = onOpenFile,
+                        onNewFile = onNewFile,
+                        onConnect = onConnect,
+                        onOpenFolder = onOpenFolder,
+                        showWelcome = showWelcome,
+                        onShowWelcomeChange = onShowWelcomeChange
                     )
                 }
                 composable(Routes.EXTENSIONS) {
