@@ -60,7 +60,7 @@ fun DashboardNavHost(
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = drawerBgColor,
-                drawerShape = RoundedCornerShape(end = 16.dp)
+                drawerShape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
             ) {
                 Text(
                     text = "CodeStudio",
